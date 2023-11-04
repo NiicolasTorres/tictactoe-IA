@@ -4,6 +4,9 @@ import random
 ALL_SPACES=['1','2','3','4','5','6','7','8','9']
 X, O, BLANK = 'X','O',' '
 
+
+AI_COUNT = 0
+
 def random_ai_move(board):
     available_spaces = []
     
@@ -15,6 +18,90 @@ def random_ai_move(board):
         return random.choice(available_spaces)
     else:
         return None
+    
+    
+def strategic_ai_move(board, player):    
+    # checking is AI wins on the next move
+    for space in ALL_SPACES:
+        if board[space] == BLANK:
+            board[space] == player
+            if complex_check_winner(board, player, space):
+                return space
+            board[space] = BLANK
+            
+    if player == X:
+        opponent = O
+    else:
+        opponent = X          
+    # checking is the opponent(human) will win
+    for space in ALL_SPACES:
+        if board[space] == BLANK:
+            board[space] == opponent
+            if complex_check_winner(board, opponent, space):
+                return space
+            board[space] = BLANK
+            
+            
+    strategic_moves = ['5','1','3','9','7','4','8','6','2' ]
+    for move in strategic_moves:
+        if board[move] == BLANK:
+            return move
+
+def minimax(board, depth, isMaximizing, player):
+    if player == X:
+        opponent = O
+    else:
+        opponent = X
+        
+        
+    global AI_COUNT
+    
+    AI_COUNT += 1
+        
+    if check_winner(board, player):
+        return 1
+    elif check_winner(board, opponent):
+        return -1
+    elif check_board_full(board):
+        return 0
+    
+    if isMaximizing:
+        best_score = -float('inf')
+        for space in ALL_SPACES:
+            if board[space] == BLANK:
+                board[space] = player 
+                score = minimax(board, depth + 1, False, player)
+
+                board[space] = BLANK
+                best_score = max (score, best_score)
+        return best_score
+    else:
+        best_score = float('inf')
+        for space in ALL_SPACES:
+            if board[space] == BLANK:
+                board[space] = opponent
+                score = minimax(board, depth + 1, True, player)
+                board[space] = BLANK
+                best_score = min(score, best_score)
+        return best_score
+
+
+def best_move_ai(board, player):
+    best_score = -float('inf')
+    best_move = None
+    
+    for space in ALL_SPACES:
+        if board[space] == BLANK:
+            board[space] = player
+            score = minimax(board, 0, False, player)
+            board[space] = BLANK
+            if score >  best_score:
+                best_score = score
+                best_move = space
+                
+    return best_move
+
+
 
 def get_blank_board():
     board = {}
@@ -96,9 +183,9 @@ def play_tic_tac_toe():
     gameBoard = get_blank_board()
     
     choice = ''
-    while choice.lower() != 'x' and choice.lower() !='o':
+    while choice.lower() != 'x' and choice.lower() != 'o':
         choice = input('¿Quieres jugar como X u O?')
-        if choice.lower() == 'X':
+        if choice.lower() == 'x':
             real_player, ai_player = X, O
         else:
             real_player, ai_player = O, X
@@ -116,14 +203,15 @@ def play_tic_tac_toe():
                 entry = input(f'Por favor, ingrese la posición en la que desea colocar a {current_player} >')
             mark_board(gameBoard, entry, current_player)
         else:
-            entry = random_ai_move(gameBoard)
+            entry = best_move_ai(gameBoard, current_player)
             if entry:
                 print(f'IA{current_player} eligio el lugar {entry}')
                 mark_board(gameBoard, entry, current_player)
         
         if complex_check_winner(gameBoard, current_player, entry):
             print(display_board(gameBoard))
-            print(current_player + ' ganaste el juego')           
+            print(current_player + ' ganaste el juego')
+            print(AI_COUNT)           
             break
             
         elif check_board_full(gameBoard):
