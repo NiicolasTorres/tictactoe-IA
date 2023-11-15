@@ -1,129 +1,99 @@
 import random
 
+MARKERS = ('X', 'O', ' ')
+X, O, BLANK = MARKERS
 
-ALL_SPACES=['1','2','3','4','5','6','7','8','9']
-X, O, BLANK = 'X','O',' '
-
-
+ALL_SPACES = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 AI_COUNT = 0
 
 def random_ai_move(board):
-    available_spaces = []
-    
-    for  space in board:
-        if board[space] == BLANK:
-            available_spaces.append(space)
-            
-    if len(available_spaces) > 0 :
-        return random.choice(available_spaces)
-    else:
-        return None
+    available_spaces = [space for space in board if board[space] == BLANK]
+    return random.choice(available_spaces) if available_spaces else None
     
     
-def strategic_ai_move(board, player):    
-    # checking is AI wins on the next move
+def strategic_ai_move(board, player):
     for space in ALL_SPACES:
         if board[space] == BLANK:
-            board[space] == player
+            board[space] = player
             if complex_check_winner(board, player, space):
                 return space
             board[space] = BLANK
-            
-    if player == X:
-        opponent = O
-    else:
-        opponent = X          
-    # checking is the opponent(human) will win
+
+    opponent = O if player == X else X
     for space in ALL_SPACES:
         if board[space] == BLANK:
-            board[space] == opponent
+            board[space] = opponent
             if complex_check_winner(board, opponent, space):
                 return space
             board[space] = BLANK
-            
-            
-    strategic_moves = ['5','1','3','9','7','4','8','6','2' ]
+
+    strategic_moves = ['5', '1', '3', '9', '7', '4', '8', '6', '2']
     for move in strategic_moves:
         if board[move] == BLANK:
             return move
 
 def minimax(board, depth, isMaximizing, player):
-    if player == X:
-        opponent = O
-    else:
-        opponent = X
-        
-        
+    opponent = O if player == X else X
     global AI_COUNT
-    
     AI_COUNT += 1
-        
+
     if check_winner(board, player):
         return 1
     elif check_winner(board, opponent):
         return -1
     elif check_board_full(board):
         return 0
-    
+
+    available_spaces = [space for space in ALL_SPACES if board[space] == BLANK]
+
     if isMaximizing:
         best_score = -float('inf')
-        for space in ALL_SPACES:
-            if board[space] == BLANK:
-                board[space] = player 
-                score = minimax(board, depth + 1, False, player)
-
-                board[space] = BLANK
-                best_score = max (score, best_score)
+        for space in available_spaces:
+            board[space] = player
+            score = minimax(board, depth + 1, False, player)
+            board[space] = BLANK
+            best_score = max(score, best_score)
         return best_score
     else:
         best_score = float('inf')
-        for space in ALL_SPACES:
-            if board[space] == BLANK:
-                board[space] = opponent
-                score = minimax(board, depth + 1, True, player)
-                board[space] = BLANK
-                best_score = min(score, best_score)
+        for space in available_spaces:
+            board[space] = opponent
+            score = minimax(board, depth + 1, True, player)
+            board[space] = BLANK
+            best_score = min(score, best_score)
         return best_score
 
 
 def best_move_ai(board, player):
     best_score = -float('inf')
     best_move = None
-    
-    for space in ALL_SPACES:
-        if board[space] == BLANK:
-            board[space] = player
-            score = minimax(board, 0, False, player)
-            board[space] = BLANK
-            if score >  best_score:
-                best_score = score
-                best_move = space
-                
+
+    available_spaces = [space for space in ALL_SPACES if board[space] == BLANK]
+
+    for space in available_spaces:
+        board[space] = player
+        score = minimax(board, 0, False, player)
+        board[space] = BLANK
+
+        if score > best_score:
+            best_score, best_move = score, space
+
     return best_move
 
 
 
 def get_blank_board():
-    board = {}
-    
-    for space in  ALL_SPACES:
-        print('El espacio:', space)
-        board[space] = BLANK
-        
+    board = {space: BLANK for space in ALL_SPACES}
     return board
 
 def display_board(board):
-    return'''
-  {} | {} | {}   | 1 | 2 | 3
+    return f'''
+  {board['1']} | {board['2']} | {board['3']}   | 1 | 2 | 3
  ---|---|---  |
-  {} | {} | {}   | 4 | 5 | 6
+  {board['4']} | {board['5']} | {board['6']}   | 4 | 5 | 6
  ---|---|---  |
-  {} | {} | {}   | 7 | 8 | 9
-'''.format( 
-           board['1'],board['2'],board['3'],
-           board['4'],board['5'],board['6'],
-           board['7'],board['8'],board['9'],
-           )
+  {board['7']} | {board['8']} | {board['9']}   | 7 | 8 | 9
+'''
 
 def is_entry_valid(board, entry):
     
