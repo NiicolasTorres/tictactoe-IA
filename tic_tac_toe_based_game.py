@@ -138,15 +138,6 @@ def complex_check_winner(board, player_mark, entry):
             return True
     return False
     
- #   for combo in all_winning_combos:
- #       if entry in combo:
- #           count = 0
- #           for space in combo:
- #               if board[space] == player_mark:
- #                   count += 1  # count = count + 1
- #           if count == 3:
- #               return True
- #  return False
 
 def play_tic_tac_toe():
     print('Bienvenido a Tic Tac Toe!')
@@ -192,7 +183,3 @@ def play_tic_tac_toe():
             
         current_player, next_plyer = next_plyer, current_player
     
-    
-    
-    
-play_tic_tac_toe()
